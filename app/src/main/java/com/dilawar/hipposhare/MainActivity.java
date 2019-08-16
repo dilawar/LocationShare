@@ -1,4 +1,4 @@
-package ca.cmetcalfe.locationshare;
+package com.dilawar.hipposhare;
 
 import android.Manifest;
 import android.content.ClipData;
