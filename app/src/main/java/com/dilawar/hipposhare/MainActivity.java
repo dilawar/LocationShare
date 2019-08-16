@@ -51,8 +51,10 @@ public class MainActivity extends AppCompatActivity {
     private LocationManager locManager;
     private Location lastLocation;
 
-    private final LocationListener locListener = new LocationListener() {
+    private final LocationListener locListener = new LocationListener()
+    {
         public void onLocationChanged(Location loc) {
+            Log.i("LOCATION: ",  Location.convert(loc.getLatitude(), Location.FORMAT_DEGREES) );
             updateLocation(loc);
         }
 
@@ -129,6 +131,7 @@ public class MainActivity extends AppCompatActivity {
     // UI
     // ----------------------------------------------------
     private void updateLocation() {
+
         // Trigger a UI update without changing the location
         updateLocation(lastLocation);
     }
@@ -149,12 +152,15 @@ public class MainActivity extends AppCompatActivity {
         copyButton.setEnabled(haveLocation);
         viewButton.setEnabled(haveLocation);
 
-        if (haveLocation) {
+        if (haveLocation) 
+        {
             String newline = System.getProperty("line.separator");
-            detailsText.setText(String.format("%s: %s%s%s: %s (%s)%s%s: %s (%s)",
+            detailsText.setText(String.format("%s: %s%s%s: %s (%s)%s%s: %s (%s)%sSpeed: %s m/s",
                     getString(R.string.accuracy), getAccuracy(location), newline,
                     getString(R.string.latitude), getLatitude(location), getDMSLatitude(location), newline,
-                    getString(R.string.longitude), getLongitude(location), getDMSLongitude(location)));
+                    getString(R.string.longitude), getLongitude(location), getDMSLongitude(location), newline,
+                    getSpeed(location)
+                    ));
 
             lastLocation = location;
         }
@@ -280,18 +286,20 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void startRequestingLocation() {
-        if (!locManager.isProviderEnabled(LocationManager.GPS_PROVIDER)) {
+        if (! locManager.isProviderEnabled(LocationManager.GPS_PROVIDER)) {
             return;
         }
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M &&
-                checkSelfPermission(Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
-            requestPermissions(new String[]{Manifest.permission.ACCESS_COARSE_LOCATION}, PERMISSION_REQUEST);
+                checkSelfPermission(Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) 
+        {
+            requestPermissions(new String[]{Manifest.permission.ACCESS_FINE_LOCATION}, PERMISSION_REQUEST);
             return;
         }
 
         // GPS enabled and have permission - start requesting location updates
-        locManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 0, 0, locListener);
+        locManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 1000, 0
+                , locListener);
     }
 
     private boolean validLocation(Location location) {
@@ -306,6 +314,16 @@ public class MainActivity extends AppCompatActivity {
             return SystemClock.elapsedRealtimeNanos() - location.getElapsedRealtimeNanos() < 30e9;
         }
     }
+
+    private String getSpeed(Location location)
+    {
+        if( ! location.hasSpeed() )
+            return "?";
+
+        float speed = location.getSpeed();
+        return String.format(Locale.US, "%.2f", speed);
+    }
+
 
     private String getAccuracy(Location location) {
         float accuracy = location.getAccuracy();
