@@ -33,8 +33,8 @@ import androidx.annotation.NonNull;
 import androidx.appcompat.app.AlertDialog.Builder;
 import androidx.appcompat.app.AppCompatActivity;
 
-
-public class MainActivity extends AppCompatActivity {
+public class MainActivity extends AppCompatActivity
+{
 
     private final static int PERMISSION_REQUEST = 1;
     private static final String TAG = MainActivity.class.getSimpleName();
@@ -48,25 +48,31 @@ public class MainActivity extends AppCompatActivity {
     private Button copyButton;
     private Button viewButton;
 
+    private Button serviceButton;
+
     private LocationManager locManager;
     private Location lastLocation;
 
     private final LocationListener locListener = new LocationListener()
     {
-        public void onLocationChanged(Location loc) {
+        public void onLocationChanged(Location loc)
+        {
             Log.i("LOCATION: ",  Location.convert(loc.getLatitude(), Location.FORMAT_DEGREES) );
             updateLocation(loc);
         }
 
-        public void onProviderEnabled(String provider) {
+        public void onProviderEnabled(String provider)
+        {
             updateLocation();
         }
 
-        public void onProviderDisabled(String provider) {
+        public void onProviderDisabled(String provider)
+        {
             updateLocation();
         }
 
-        public void onStatusChanged(String provider, int status, Bundle extras) {
+        public void onStatusChanged(String provider, int status, Bundle extras)
+        {
         }
     };
 
@@ -74,7 +80,8 @@ public class MainActivity extends AppCompatActivity {
     // Android Lifecycle
     // ----------------------------------------------------
     @Override
-    protected void onCreate(Bundle savedInstanceState) {
+    protected void onCreate(Bundle savedInstanceState)
+    {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         setSupportActionBar(findViewById(R.id.toolbar));
@@ -91,24 +98,39 @@ public class MainActivity extends AppCompatActivity {
         copyButton = findViewById(R.id.copyButton);
         viewButton = findViewById(R.id.viewButton);
 
+        // Share activity button.
+
+        serviceButton = findViewById(R.id.serviceButton); 
         // Set default values for preferences
         PreferenceManager.setDefaultValues(this, R.xml.preferences, false);
 
         locManager = (LocationManager) getSystemService(LOCATION_SERVICE);
     }
 
+    public void onStartJobIntentService(View view)
+    {
+        Intent mIntent = new Intent(this, ShareLocationService.class);
+        mIntent.putExtra("maxCountValue", 1000);
+        ShareLocationService.enqueueWork(this, mIntent);
+    }
+
     @Override
-    protected void onStop() {
+    protected void onStop()
+    {
         super.onStop();
-        try {
+        try
+        {
             locManager.removeUpdates(locListener);
-        } catch (SecurityException e) {
+        }
+        catch (SecurityException e)
+        {
             Log.e(TAG, "Failed to stop listening for location updates", e);
         }
     }
 
     @Override
-    protected void onResume() {
+    protected void onResume()
+    {
         super.onResume();
         startRequestingLocation();
         updateLocation();
@@ -117,11 +139,15 @@ public class MainActivity extends AppCompatActivity {
     @Override
     public void onRequestPermissionsResult(int requestCode,
                                            @NonNull String permissions[],
-                                           @NonNull int[] grantResults) {
+                                           @NonNull int[] grantResults)
+    {
         if (requestCode == PERMISSION_REQUEST &&
-                grantResults.length == 1 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                grantResults.length == 1 && grantResults[0] == PackageManager.PERMISSION_GRANTED)
+        {
             startRequestingLocation();
-        } else {
+        }
+        else
+        {
             Toast.makeText(getApplicationContext(), R.string.permission_denied, Toast.LENGTH_SHORT).show();
             finish();
         }
@@ -130,13 +156,15 @@ public class MainActivity extends AppCompatActivity {
     // ----------------------------------------------------
     // UI
     // ----------------------------------------------------
-    private void updateLocation() {
+    private void updateLocation()
+    {
 
         // Trigger a UI update without changing the location
         updateLocation(lastLocation);
     }
 
-    private void updateLocation(Location location) {
+    private void updateLocation(Location location)
+    {
         boolean locationEnabled = locManager.isProviderEnabled(LocationManager.GPS_PROVIDER);
         boolean waitingForLocation = locationEnabled && !validLocation(location);
         boolean haveLocation = locationEnabled && !waitingForLocation;
@@ -152,15 +180,15 @@ public class MainActivity extends AppCompatActivity {
         copyButton.setEnabled(haveLocation);
         viewButton.setEnabled(haveLocation);
 
-        if (haveLocation) 
+        if (haveLocation)
         {
             String newline = System.getProperty("line.separator");
             detailsText.setText(String.format("%s: %s%s%s: %s (%s)%s%s: %s (%s)%sSpeed: %s m/s",
-                    getString(R.string.accuracy), getAccuracy(location), newline,
-                    getString(R.string.latitude), getLatitude(location), getDMSLatitude(location), newline,
-                    getString(R.string.longitude), getLongitude(location), getDMSLongitude(location), newline,
-                    getSpeed(location)
-                    ));
+                                              getString(R.string.accuracy), getAccuracy(location), newline,
+                                              getString(R.string.latitude), getLatitude(location), getDMSLatitude(location), newline,
+                                              getString(R.string.longitude), getLongitude(location), getDMSLongitude(location), newline,
+                                              getSpeed(location)
+                                             ));
 
             lastLocation = location;
         }
@@ -169,16 +197,20 @@ public class MainActivity extends AppCompatActivity {
     // ----------------------------------------------------
     // DialogInterface Listeners
     // ----------------------------------------------------
-    private class onClickShareListener implements OnClickListener {
+    private class onClickShareListener implements OnClickListener
+    {
         @Override
-        public void onClick(DialogInterface dialog, int i) {
+        public void onClick(DialogInterface dialog, int i)
+        {
             shareLocationText(formatLocation(lastLocation, getResources().getStringArray(R.array.link_options)[i]));
         }
     }
 
-    private class onClickCopyListener implements OnClickListener {
+    private class onClickCopyListener implements OnClickListener
+    {
         @Override
-        public void onClick(DialogInterface dialog, int i) {
+        public void onClick(DialogInterface dialog, int i)
+        {
             copyLocationText(formatLocation(lastLocation, getResources().getStringArray(R.array.link_options)[i]));
         }
     }
@@ -188,20 +220,23 @@ public class MainActivity extends AppCompatActivity {
     //-----------------------------------------------------
 
     @Override
-    public boolean onCreateOptionsMenu(Menu menu) {
+    public boolean onCreateOptionsMenu(Menu menu)
+    {
         this.getMenuInflater().inflate(R.menu.menu_toolbar, menu);
         return true;
     }
 
     @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
-        switch (item.getItemId()) {
-            case R.id.action_settings:
-                Intent intentSettingsActivity = new Intent(this, SettingsActivity.class);
-                this.startActivity(intentSettingsActivity);
-                return true;
-            default:
-                return super.onOptionsItemSelected(item);
+    public boolean onOptionsItemSelected(MenuItem item)
+    {
+        switch (item.getItemId())
+        {
+        case R.id.action_settings:
+            Intent intentSettingsActivity = new Intent(this, SettingsActivity.class);
+            this.startActivity(intentSettingsActivity);
+            return true;
+        default:
+            return super.onOptionsItemSelected(item);
 
         }
     }
@@ -209,44 +244,56 @@ public class MainActivity extends AppCompatActivity {
     // ----------------------------------------------------
     // Actions
     // ----------------------------------------------------
-    public void shareLocation(View view) {
-        if (!validLocation(lastLocation)) {
+    public void shareLocation(View view)
+    {
+        if (!validLocation(lastLocation))
+        {
             return;
         }
 
         String linkChoice = PreferenceManager.getDefaultSharedPreferences(this).getString("prefLinkType", "");
 
-        if (linkChoice.equals(getResources().getString(R.string.always_ask))) {
+        if (linkChoice.equals(getResources().getString(R.string.always_ask)))
+        {
             new Builder(this).setTitle(R.string.choose_link)
-                    .setCancelable(true)
-                    .setItems(R.array.link_names, new onClickShareListener())
-                    .create()
-                    .show();
-        } else {
+            .setCancelable(true)
+            .setItems(R.array.link_names, new onClickShareListener())
+            .create()
+            .show();
+        }
+        else
+        {
             shareLocationText(formatLocation(lastLocation, linkChoice));
         }
     }
 
-    public void copyLocation(View view) {
-        if (!validLocation(lastLocation)) {
+    public void copyLocation(View view)
+    {
+        if (!validLocation(lastLocation))
+        {
             return;
         }
 
         String linkChoice = PreferenceManager.getDefaultSharedPreferences(this).getString("prefLinkType", "");
 
-        if (linkChoice.equals(getResources().getString(R.string.always_ask))) {
+        if (linkChoice.equals(getResources().getString(R.string.always_ask)))
+        {
             new Builder(this).setTitle(R.string.choose_link)
-                    .setCancelable(true)
-                    .setItems(R.array.link_names, new onClickCopyListener())
-                    .create()
-                    .show();
-        } else {
+            .setCancelable(true)
+            .setItems(R.array.link_names, new onClickCopyListener())
+            .create()
+            .show();
+        }
+        else
+        {
             copyLocationText(formatLocation(lastLocation, linkChoice));
         }
     }
 
-    public void viewLocation(View view) {
-        if (!validLocation(lastLocation)) {
+    public void viewLocation(View view)
+    {
+        if (!validLocation(lastLocation))
+        {
             return;
         }
 
@@ -256,8 +303,10 @@ public class MainActivity extends AppCompatActivity {
         startActivity(Intent.createChooser(intent, getString(R.string.view_location_via)));
     }
 
-    public void openLocationSettings(View view) {
-        if (!locManager.isProviderEnabled(LocationManager.GPS_PROVIDER)) {
+    public void openLocationSettings(View view)
+    {
+        if (!locManager.isProviderEnabled(LocationManager.GPS_PROVIDER))
+        {
             startActivity(new Intent(Settings.ACTION_LOCATION_SOURCE_SETTINGS));
         }
     }
@@ -265,7 +314,8 @@ public class MainActivity extends AppCompatActivity {
     // ----------------------------------------------------
     // Helper functions
     // ----------------------------------------------------
-    public void shareLocationText(String string) {
+    public void shareLocationText(String string)
+    {
         Intent intent = new Intent();
         intent.setAction(Intent.ACTION_SEND);
         intent.putExtra(Intent.EXTRA_TEXT, string);
@@ -273,44 +323,55 @@ public class MainActivity extends AppCompatActivity {
         startActivity(Intent.createChooser(intent, getString(R.string.share_location_via)));
     }
 
-    public void copyLocationText(String string) {
+    public void copyLocationText(String string)
+    {
         ClipboardManager clipboard = (ClipboardManager) getSystemService(Context.CLIPBOARD_SERVICE);
-        if (clipboard != null) {
+        if (clipboard != null)
+        {
             ClipData clip = ClipData.newPlainText(getString(R.string.app_name), string);
             clipboard.setPrimaryClip(clip);
             Toast.makeText(getApplicationContext(), R.string.copied, Toast.LENGTH_SHORT).show();
-        } else {
+        }
+        else
+        {
             Log.e(TAG, "Failed to get the clipboard service");
             Toast.makeText(getApplicationContext(), R.string.clipboard_error, Toast.LENGTH_SHORT).show();
         }
     }
 
-    private void startRequestingLocation() {
-        if (! locManager.isProviderEnabled(LocationManager.GPS_PROVIDER)) {
+    private void startRequestingLocation()
+    {
+        if (! locManager.isProviderEnabled(LocationManager.GPS_PROVIDER))
+        {
             return;
         }
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M &&
-                checkSelfPermission(Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) 
+                checkSelfPermission(Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED)
         {
-            requestPermissions(new String[]{Manifest.permission.ACCESS_FINE_LOCATION}, PERMISSION_REQUEST);
+            requestPermissions(new String[] {Manifest.permission.ACCESS_FINE_LOCATION}, PERMISSION_REQUEST);
             return;
         }
 
         // GPS enabled and have permission - start requesting location updates
         locManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 1000, 0
-                , locListener);
+                                          , locListener);
     }
 
-    private boolean validLocation(Location location) {
-        if (location == null) {
+    private boolean validLocation(Location location)
+    {
+        if (location == null)
+        {
             return false;
         }
 
         // Location must be from less than 30 seconds ago to be considered valid
-        if (Build.VERSION.SDK_INT < 17) {
+        if (Build.VERSION.SDK_INT < 17)
+        {
             return System.currentTimeMillis() - location.getTime() < 30e3;
-        } else {
+        }
+        else
+        {
             return SystemClock.elapsedRealtimeNanos() - location.getElapsedRealtimeNanos() < 30e9;
         }
     }
@@ -325,47 +386,58 @@ public class MainActivity extends AppCompatActivity {
     }
 
 
-    private String getAccuracy(Location location) {
+    private String getAccuracy(Location location)
+    {
         float accuracy = location.getAccuracy();
-        if (accuracy < 0.01) {
+        if (accuracy < 0.01)
+        {
             return "?";
-        } else if (accuracy > 99) {
+        }
+        else if (accuracy > 99)
+        {
             return "99+";
-        } else {
+        }
+        else
+        {
             return String.format(Locale.US, "%2.0fm", accuracy);
         }
     }
 
-    private String getLatitude(Location location) {
+    private String getLatitude(Location location)
+    {
         return String.format(Locale.US, "%2.5f", location.getLatitude());
     }
 
-    private String getDMSLatitude(Location location) {
+    private String getDMSLatitude(Location location)
+    {
         double val = location.getLatitude();
         return String.format(Locale.US, "%.0f° %2.0f′ %2.3f″ %s",
-                Math.floor(Math.abs(val)),
-                Math.floor(Math.abs(val * 60) % 60),
-                (Math.abs(val) * 3600) % 60,
-                val > 0 ? "N" : "S"
-        );
+                             Math.floor(Math.abs(val)),
+                             Math.floor(Math.abs(val * 60) % 60),
+                             (Math.abs(val) * 3600) % 60,
+                             val > 0 ? "N" : "S"
+                            );
     }
 
-    private String getDMSLongitude(Location location) {
+    private String getDMSLongitude(Location location)
+    {
         double val = location.getLongitude();
         return String.format(Locale.US, "%.0f° %2.0f′ %2.3f″ %s",
-                Math.floor(Math.abs(val)),
-                Math.floor(Math.abs(val * 60) % 60),
-                (Math.abs(val) * 3600) % 60,
-                val > 0 ? "E" : "W"
-        );
+                             Math.floor(Math.abs(val)),
+                             Math.floor(Math.abs(val * 60) % 60),
+                             (Math.abs(val) * 3600) % 60,
+                             val > 0 ? "E" : "W"
+                            );
     }
 
-    private String getLongitude(Location location) {
+    private String getLongitude(Location location)
+    {
         return String.format(Locale.US, "%3.5f", location.getLongitude());
     }
 
-    private String formatLocation(Location location, String format) {
+    private String formatLocation(Location location, String format)
+    {
         return MessageFormat.format(format,
-                getLatitude(location), getLongitude(location));
+                                    getLatitude(location), getLongitude(location));
     }
 }

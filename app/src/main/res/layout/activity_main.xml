@@ -89,6 +89,19 @@
             android:onClick="viewLocation"
             android:text="@string/view_location" />
 
+        <Button
+            android:id="@+id/serviceButton"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="8dp"
+            android:layout_marginTop="8dp"
+            android:layout_marginEnd="8dp"
+            android:layout_marginBottom="8dp"
+            android:letterSpacing="0.2"
+            android:onClick="onStartJobIntentService"
+            android:text="Start JobIntentService"
+            />
+
     </LinearLayout>
 
 </RelativeLayout>
