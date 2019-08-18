@@ -97,6 +97,7 @@
         android:layout_height="108dp"
         android:layout_below="@+id/shareLayout"
         android:orientation="horizontal"
+        android:layout_marginTop="100dp"
         android:paddingLeft="@dimen/activity_horizontal_margin"
         android:paddingRight="@dimen/activity_horizontal_margin">
 

@@ -58,7 +58,7 @@ public class MainActivity extends AppCompatActivity
         public void onLocationChanged(Location loc)
         {
             Log.i("LOCATION: "
-                    , Location.convert(loc.getLatitude(), Location.FORMAT_DEGREES)
+                  , Location.convert(loc.getLatitude(), Location.FORMAT_DEGREES)
                  );
             updateLocation(loc);
         }
@@ -75,7 +75,7 @@ public class MainActivity extends AppCompatActivity
 
         public void onStatusChanged(String provider, int status, Bundle extras)
         {
-            // 
+            //
         }
     };
 
@@ -103,7 +103,7 @@ public class MainActivity extends AppCompatActivity
 
         // Share activity button.
 
-        serviceButton = findViewById(R.id.serviceButton); 
+        serviceButton = findViewById(R.id.serviceButton);
 
         // Set default values for preferences
         PreferenceManager.setDefaultValues(this, R.xml.preferences, false);
@@ -113,7 +113,6 @@ public class MainActivity extends AppCompatActivity
 
         // Shart sharing location.
         serviceButton.setText( "STOP SHARING");
-        // If alreay busy then do not enque more work.
         Intent mIntent = new Intent(this, ShareLocationService.class);
         ShareLocationService.enqueueWork(this, mIntent);
     }
@@ -137,9 +136,6 @@ public class MainActivity extends AppCompatActivity
         }
         else
             serviceButton.setText( "START SHARING");
-
-
-
     }
 
     @Override
@@ -208,15 +204,17 @@ public class MainActivity extends AppCompatActivity
         copyButton.setEnabled(haveLocation);
         viewButton.setEnabled(haveLocation);
 
-        if (haveLocation)
+        if(haveLocation)
         {
             String newline = System.getProperty("line.separator");
-            detailsText.setText(String.format("%s: %s%s%s: %s (%s)%s%s: %s (%s)%sSpeed: %s m/s",
-                                              getString(R.string.accuracy), getAccuracy(location), newline,
-                                              getString(R.string.latitude), getLatitude(location), getDMSLatitude(location), newline,
-                                              getString(R.string.longitude), getLongitude(location), getDMSLongitude(location), newline,
-                                              getSpeed(location)
-                                             ));
+            detailsText.setText(
+                String.format("%s: %s%s%s: %s (%s)%s%s: %s (%s)%sSpeed: %s m/s",
+                              getString(R.string.accuracy), getAccuracy(location), newline,
+                              getString(R.string.latitude), getLatitude(location), getDMSLatitude(location), newline,
+                              getString(R.string.longitude), getLongitude(location), getDMSLongitude(location), newline,
+                              getSpeed(location)
+                             )
+            );
 
             lastLocation = location;
         }
@@ -382,8 +380,7 @@ public class MainActivity extends AppCompatActivity
         }
 
         // GPS enabled and have permission - start requesting location updates
-        locManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 1000, 0
-                                          , locListener);
+        locManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 1000, 0, locListener);
     }
 
     private boolean validLocation(Location location)
