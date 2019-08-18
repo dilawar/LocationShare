@@ -1,5 +1,6 @@
 build :
-	./gradlew  build 
+	./gradlew  build
+
 
 upload : build
 	adb un com.dilawar.hipposhare || echo "Failed to uninstall"

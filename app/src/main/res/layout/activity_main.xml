@@ -91,10 +91,10 @@
 
     </LinearLayout>
 
-    <LinearLayout
+    <RelativeLayout
         android:id="@+id/backgroundLayout"
         android:layout_width="fill_parent"
-        android:layout_height="54dp"
+        android:layout_height="108dp"
         android:layout_below="@+id/shareLayout"
         android:orientation="horizontal"
         android:paddingLeft="@dimen/activity_horizontal_margin"
@@ -102,17 +102,19 @@
 
         <Button
             android:id="@+id/serviceButton"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
+            android:layout_width="300dp"
+            android:layout_height="300dp"
             android:layout_marginStart="8dp"
             android:layout_marginTop="8dp"
             android:layout_marginEnd="8dp"
             android:layout_marginBottom="8dp"
-            android:letterSpacing="0.2"
-            android:onClick="onStartJobIntentService"
-            android:text="Start JobIntentService"
+            android:layout_centerInParent="true"
+            android:background="@drawable/button_bg_round"
+            android:letterSpacing="0.1"
+            android:onClick="toggleJobIntentService"
+            android:text="Start Sharing"
             />
 
-    </LinearLayout>
+    </RelativeLayout>
 
 </RelativeLayout>

@@ -57,7 +57,9 @@ public class MainActivity extends AppCompatActivity
     {
         public void onLocationChanged(Location loc)
         {
-            Log.i("LOCATION: ",  Location.convert(loc.getLatitude(), Location.FORMAT_DEGREES) );
+            Log.i("LOCATION: "
+                    , Location.convert(loc.getLatitude(), Location.FORMAT_DEGREES)
+                 );
             updateLocation(loc);
         }
 
@@ -73,6 +75,7 @@ public class MainActivity extends AppCompatActivity
 
         public void onStatusChanged(String provider, int status, Bundle extras)
         {
+            // 
         }
     };
 
@@ -101,17 +104,42 @@ public class MainActivity extends AppCompatActivity
         // Share activity button.
 
         serviceButton = findViewById(R.id.serviceButton); 
+
         // Set default values for preferences
         PreferenceManager.setDefaultValues(this, R.xml.preferences, false);
 
         locManager = (LocationManager) getSystemService(LOCATION_SERVICE);
+
+
+        // Shart sharing location.
+        serviceButton.setText( "STOP SHARING");
+        // If alreay busy then do not enque more work.
+        Intent mIntent = new Intent(this, ShareLocationService.class);
+        ShareLocationService.enqueueWork(this, mIntent);
     }
 
-    public void onStartJobIntentService(View view)
+    public void toggleJobIntentService(View view)
     {
-        Intent mIntent = new Intent(this, ShareLocationService.class);
-        mIntent.putExtra("maxCountValue", 1000);
-        ShareLocationService.enqueueWork(this, mIntent);
+        String buttonStr = serviceButton.getText().toString().trim().toLowerCase();
+
+        Log.i( "Button", buttonStr);
+        if( buttonStr.equals("start sharing"))
+        {
+            serviceButton.setText( "STOP SHARING");
+            // If alreay busy then do not enque more work.
+            Intent mIntent = new Intent(this, ShareLocationService.class);
+            ShareLocationService.enqueueWork(this, mIntent);
+        }
+        else if( buttonStr.equals("stop sharing"))
+        {
+            serviceButton.setText( "START SHARING");
+            ShareLocationService.shouldContinue = false;
+        }
+        else
+            serviceButton.setText( "START SHARING");
+
+
+
     }
 
     @Override
