@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name" translatable="false">Location Share</string>
+    <string name="app_name" translatable="false">NCBS Hippo Tracker</string>
 
     <string name="share_location">Share</string>
     <string name="copy_location">Copy</string>
