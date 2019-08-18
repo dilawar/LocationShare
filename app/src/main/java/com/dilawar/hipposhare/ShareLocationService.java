@@ -11,6 +11,16 @@ import android.util.Log;
 
 import java.util.Locale;
 import java.util.Date;
+import java.net.URL;
+import java.net.HttpURLConnection;
+
+import java.io.BufferedReader;
+import java.io.BufferedWriter;
+import java.io.OutputStreamWriter;
+import java.io.OutputStream;
+import java.io.DataOutputStream;
+
+import org.json.JSONObject;
 
 import android.widget.Toast;
 
@@ -73,31 +83,69 @@ public class ShareLocationService extends JobIntentService
         isBusy = true;
         shouldContinue = true;
 
+        String urlAddr = "https://ncbs.res.in/hippo/geolocation/submit";
+
         while(true)
         {
 
             // Get location here.
             mFusedLocationClient.getLastLocation().addOnSuccessListener( 
-                    //this.getMainExecutor(), 
-                    new OnSuccessListener<Location>() {
-                        @Override
-                        public void onSuccess(Location location)
+                //this.getMainExecutor(), 
+                new OnSuccessListener<Location>() {
+                    @Override
+                    public void onSuccess(Location location)
+                    {
+                        if (location != null)
                         {
-                            if (location != null)
+
+                            if( location.hasAccuracy())
                             {
-                                double wayLatitude = location.getLatitude();
-                                double wayLongitude = location.getLongitude();
-                                if( location.hasAccuracy())
+                                String now = new Date().toString();
+
+                                double lat = location.getLatitude();
+                                double lng = location.getLongitude();
+                                double accuracy = location.getAccuracy();
+                                double speed = location.getSpeed();
+                                double alt = location.getAltitude();
+
+                                Log.i("Location", String.format(Locale.US, "%s: %s, %s, %s", now, lat, lng, speed)); 
+
+                                if(speed >= 0.0)
                                 {
-                                    String now = new Date().toString();
-                                    double accuracy = location.getAccuracy();
-                                    double speed = location.getSpeed();
-                                    Log.i("Location", String.format(Locale.US, "%s: %s, %s, %s"
-                                                , now, wayLatitude, wayLongitude, speed));
+                                    try 
+                                    {
+                                        JSONObject data = new JSONObject();
+                                        data.put("latitude", lat);
+                                        data.put("longitude", lng);
+                                        data.put("accuracy", accuracy);
+                                        data.put("speed", speed);
+                                        data.put("altitude", alt);
+
+                                        URL url = new URL(urlAddr);
+
+                                        HttpURLConnection con = (HttpURLConnection) url.openConnection();
+                                        con.setRequestMethod("POST");
+                                        con.setRequestProperty("Content-Type", "application/json;charset=utf-8");
+
+                                        DataOutputStream out = new DataOutputStream(con.getOutputStream());
+
+                                        BufferedWriter writer = new BufferedWriter(
+                                                new OutputStreamWriter(out, "UTF-8")
+                                                );
+                                        writer.write(data.toString());
+                                        writer.close();
+                                        out.close();
+                                        con.connect();
+                                    }
+                                    catch(Exception e) 
+                                    {
+                                        Log.e("Post error", String.valueOf(e) + e.getMessage() );
+                                    }
                                 }
                             }
                         }
-                    });
+                    }
+                });
 
             // Wait every 10 seconds.
             android.os.SystemClock.sleep(10*1000);
