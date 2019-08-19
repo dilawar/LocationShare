@@ -5,18 +5,21 @@ import android.content.Intent;
 import android.os.Handler;
 import android.os.SystemClock;
 import android.os.Bundle;
+import android.os.StrictMode;
 
 import androidx.core.app.JobIntentService;
 import android.util.Log;
 
 import java.util.Locale;
 import java.util.Date;
-import java.net.URL;
-import java.net.HttpURLConnection;
+import java.util.HashMap;
+import java.util.Map;
+
 
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.OutputStreamWriter;
+import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.io.DataOutputStream;
 
@@ -31,7 +34,17 @@ import com.google.android.gms.location.FusedLocationProviderClient;
 import com.google.android.gms.location.LocationServices;
 import com.google.android.gms.tasks.OnSuccessListener;
 
-import java.util.concurrent.Executor;
+import com.android.volley.Request;
+import com.android.volley.RequestQueue;
+import com.android.volley.Response;
+import com.android.volley.AuthFailureError;
+import com.android.volley.VolleyError;
+import com.android.volley.toolbox.StringRequest;
+import com.android.volley.toolbox.Volley;
+
+import org.json.JSONArray;
+import org.json.JSONObject;
+import org.json.JSONException;
 
 /**
  * Example implementation of a JobIntentService.
@@ -48,6 +61,9 @@ public class ShareLocationService extends JobIntentService
     public static volatile boolean shouldContinue = true;
     public static volatile boolean isBusy = false;
 
+    private RequestQueue mRequestQueue;
+
+
     private FusedLocationProviderClient mFusedLocationClient;
 
     @Override
@@ -55,6 +71,10 @@ public class ShareLocationService extends JobIntentService
     {
         super.onCreate();
         mFusedLocationClient = LocationServices.getFusedLocationProviderClient(this);
+
+        // Disable strict mode. Ideally I should use AsyncTask
+        StrictMode.ThreadPolicy policy = new StrictMode.ThreadPolicy.Builder().permitAll().build();
+        StrictMode.setThreadPolicy(policy);
     }
 
     /**
@@ -83,15 +103,15 @@ public class ShareLocationService extends JobIntentService
         isBusy = true;
         shouldContinue = true;
 
-        String urlAddr = "https://ncbs.res.in/hippo/geolocation/submit";
+        mRequestQueue = Volley.newRequestQueue( getApplicationContext() );
+        String urlAddr = "https://www.ncbs.res.in/hippo/api/geolocation/submit";
 
         while(true)
         {
 
             // Get location here.
-            mFusedLocationClient.getLastLocation().addOnSuccessListener( 
-                //this.getMainExecutor(), 
-                new OnSuccessListener<Location>() {
+            mFusedLocationClient.getLastLocation().addOnSuccessListener
+                ( new OnSuccessListener<Location>() {
                     @Override
                     public void onSuccess(Location location)
                     {
@@ -112,35 +132,45 @@ public class ShareLocationService extends JobIntentService
 
                                 if(speed >= 0.0)
                                 {
-                                    try 
-                                    {
-                                        JSONObject data = new JSONObject();
-                                        data.put("latitude", lat);
-                                        data.put("longitude", lng);
-                                        data.put("accuracy", accuracy);
-                                        data.put("speed", speed);
-                                        data.put("altitude", alt);
+                                    StringRequest req = new StringRequest(Request.Method.POST, urlAddr, 
+                                            new Response.Listener<String>()
+                                            {
+                                                @Override
+                                                public void onResponse(String response) 
+                                                {
+                                                    Log.i("response", response);
+                                                }
+                                            }, 
+                                            new Response.ErrorListener() {
+                                                @Override 
+                                                public void onErrorResponse(VolleyError err) {
+                                                    Log.e( "Error", err.getMessage(), err);
+                                                }
+                                            }
+                                    ) {
+                                        @Override 
+                                        public Map<String, String> getHeaders() throws AuthFailureError
+                                        {
+                                            Map<String, String> header = super.getHeaders();
+                                            return header;
+                                        }
 
-                                        URL url = new URL(urlAddr);
+                                        @Override
+                                        public Map<String, String> getParams() 
+                                        {
+                                            Map<String, String> data = new HashMap<String, String>();
+                                            data.put("latitude", String.valueOf(lat));
+                                            data.put("longitude", String.valueOf(lng));
+                                            data.put("speed", String.valueOf(speed));
+                                            data.put("accuracy", String.valueOf(accuracy));
+                                            data.put("altitude", String.valueOf(alt));
+                                            data.put("session", "HIPPO_TRACKER_APP");
+                                            Log.d("POST", data.toString());
+                                            return data;
+                                        }
 
-                                        HttpURLConnection con = (HttpURLConnection) url.openConnection();
-                                        con.setRequestMethod("POST");
-                                        con.setRequestProperty("Content-Type", "application/json;charset=utf-8");
-
-                                        DataOutputStream out = new DataOutputStream(con.getOutputStream());
-
-                                        BufferedWriter writer = new BufferedWriter(
-                                                new OutputStreamWriter(out, "UTF-8")
-                                                );
-                                        writer.write(data.toString());
-                                        writer.close();
-                                        out.close();
-                                        con.connect();
-                                    }
-                                    catch(Exception e) 
-                                    {
-                                        Log.e("Post error", String.valueOf(e) + e.getMessage() );
-                                    }
+                                    };
+                                    mRequestQueue.add(req);
                                 }
                             }
                         }
