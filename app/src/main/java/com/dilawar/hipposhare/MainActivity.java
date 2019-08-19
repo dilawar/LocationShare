@@ -26,6 +26,8 @@ import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import android.graphics.Color;
+
 import java.text.MessageFormat;
 import java.util.Locale;
 
@@ -125,6 +127,7 @@ public class MainActivity extends AppCompatActivity
         if( buttonStr.equals("start sharing"))
         {
             serviceButton.setText( "STOP SHARING");
+            serviceButton.setBackgroundColor(Color.BLUE);
             // If alreay busy then do not enque more work.
             Intent mIntent = new Intent(this, ShareLocationService.class);
             ShareLocationService.enqueueWork(this, mIntent);
@@ -132,6 +135,7 @@ public class MainActivity extends AppCompatActivity
         else if( buttonStr.equals("stop sharing"))
         {
             serviceButton.setText( "START SHARING");
+            serviceButton.setBackgroundColor(Color.RED);
             ShareLocationService.shouldContinue = false;
         }
         else

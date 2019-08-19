@@ -34,7 +34,7 @@
             android:id="@+id/progressTitle"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="@string/getting_location"
+            android:text="Determining Accuracy"
             android:textAppearance="?android:attr/textAppearanceLarge"
             android:visibility="visible" />
 
@@ -93,28 +93,33 @@
 
     <RelativeLayout
         android:id="@+id/backgroundLayout"
-        android:layout_width="fill_parent"
-        android:layout_height="108dp"
+        android:layout_width="match_parent"
+        android:layout_height="365dp"
         android:layout_below="@+id/shareLayout"
+        android:layout_marginTop="170dp"
         android:orientation="horizontal"
-        android:layout_marginTop="100dp"
         android:paddingLeft="@dimen/activity_horizontal_margin"
         android:paddingRight="@dimen/activity_horizontal_margin">
 
         <Button
             android:id="@+id/serviceButton"
-            android:layout_width="300dp"
-            android:layout_height="300dp"
+            android:layout_width="200dp"
+            android:layout_height="200dp"
+            android:layout_centerInParent="true"
             android:layout_marginStart="8dp"
             android:layout_marginTop="8dp"
             android:layout_marginEnd="8dp"
             android:layout_marginBottom="8dp"
-            android:layout_centerInParent="true"
-            android:background="@drawable/button_bg_round"
+            android:background="#0000FF"
+            android:drawablePadding="20dp"
+            android:ellipsize="none"
             android:letterSpacing="0.1"
             android:onClick="toggleJobIntentService"
+            android:singleLine="true"
+            android:soundEffectsEnabled="true"
             android:text="Start Sharing"
-            />
+            android:textAppearance="@style/TextAppearance.AppCompat.Large"
+            android:visibility="visible" />
 
     </RelativeLayout>
 
