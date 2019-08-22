@@ -408,7 +408,7 @@ public class MainActivity extends AppCompatActivity
     private String getSpeed(Location location)
     {
         if( ! location.hasSpeed() )
-            return "?";
+            return "";
 
         float speed = location.getSpeed();
         return String.format(Locale.US, "%.2f", speed);

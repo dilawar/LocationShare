@@ -14,6 +14,7 @@ import java.util.Locale;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.UUID;
 
 
 import java.io.BufferedReader;
@@ -65,6 +66,7 @@ public class ShareLocationService extends JobIntentService
 
 
     private FusedLocationProviderClient mFusedLocationClient;
+    private String deviceID = UUID.randomUUID().toString();
 
     @Override
     public void onCreate()
@@ -121,14 +123,16 @@ public class ShareLocationService extends JobIntentService
                             if( location.hasAccuracy())
                             {
                                 String now = new Date().toString();
-
                                 double lat = location.getLatitude();
                                 double lng = location.getLongitude();
                                 double accuracy = location.getAccuracy();
                                 double speed = location.getSpeed();
                                 double alt = location.getAltitude();
 
-                                Log.i("Location", String.format(Locale.US, "%s: %s, %s, %s", now, lat, lng, speed)); 
+                                Log.i("Location"
+                                        , String.format(Locale.US
+                                                ,"%s: %s, %s, %s", now, lat, lng, speed)
+                                );
 
                                 if(speed >= 0.0)
                                 {
@@ -159,12 +163,12 @@ public class ShareLocationService extends JobIntentService
                                         public Map<String, String> getParams() 
                                         {
                                             Map<String, String> data = new HashMap<String, String>();
-                                            data.put("latitude", String.valueOf(lat));
-                                            data.put("longitude", String.valueOf(lng));
-                                            data.put("speed", String.valueOf(speed));
-                                            data.put("accuracy", String.valueOf(accuracy));
-                                            data.put("altitude", String.valueOf(alt));
-                                            data.put("session", "HIPPO_TRACKER_APP");
+                                            data.put("latitude", String.format("%2.6f", lat));
+                                            data.put("longitude", String.format("%2.6f", lng));
+                                            data.put("altitude", String.format("%2.6f", alt));
+                                            data.put("speed", String.format("%.3f", speed));
+                                            data.put("accuracy", String.format("%2.0f", accuracy));
+                                            data.put("device_id", String.format("%s", deviceID));
                                             Log.d("POST", data.toString());
                                             return data;
                                         }
